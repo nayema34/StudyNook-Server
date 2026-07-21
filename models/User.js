@@ -20,6 +20,19 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user',
+  },
+  bio: {
+    type: String,
+    default: '',
+  },
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
   bookings: [
     {
       type: mongoose.Schema.Types.ObjectId,
