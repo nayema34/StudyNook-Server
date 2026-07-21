@@ -31,9 +31,17 @@ app.use('/api/rooms', require('./routes/rooms'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/reviews', require('./routes/reviews'));
 
-// Base Route
+// Base & Health Routes
 app.get('/', (req, res) => {
   res.send('StudyNook API is running...');
+});
+
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Error Handler Middleware
