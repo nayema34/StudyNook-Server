@@ -3,13 +3,20 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
+const verifyEnv = require('./lib/env-check');
+const requestLogger = require('./middleware/logger');
+const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
+
+// Verify required env vars
+verifyEnv();
 
 // Connect to Database
 connectDB();
 
 // Middleware
+app.use(requestLogger);
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:3000',
   credentials: true,
@@ -27,6 +34,9 @@ app.use('/api/bookings', require('./routes/bookings'));
 app.get('/', (req, res) => {
   res.send('StudyNook API is running...');
 });
+
+// Error Handler Middleware
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
