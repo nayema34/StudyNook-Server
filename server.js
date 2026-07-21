@@ -29,6 +29,7 @@ const { handleAuthRequest } = require('./lib/auth');
 app.use('/api/auth', handleAuthRequest);
 app.use('/api/rooms', require('./routes/rooms'));
 app.use('/api/bookings', require('./routes/bookings'));
+app.use('/api/reviews', require('./routes/reviews'));
 
 // Base Route
 app.get('/', (req, res) => {
