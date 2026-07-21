@@ -5,6 +5,7 @@ const RoomSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
+    index: true,
   },
   description: {
     type: String,
@@ -21,14 +22,25 @@ const RoomSchema = new mongoose.Schema({
   capacity: {
     type: Number,
     required: true,
+    min: 1,
   },
   hourlyRate: {
     type: Number,
     required: true,
+    min: 0,
+    index: true,
   },
   amenities: {
     type: [String],
     default: [],
+  },
+  rating: {
+    type: Number,
+    default: 4.8,
+  },
+  isAvailable: {
+    type: Boolean,
+    default: true,
   },
   ownerId: {
     type: mongoose.Schema.Types.ObjectId,
