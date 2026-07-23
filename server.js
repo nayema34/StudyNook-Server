@@ -33,12 +33,14 @@ app.use(cors({
   },
   credentials: true,
 }));
+// Define Auth Route before body parser
+const { handleAuthRequest } = require('./lib/auth');
+app.use('/api/auth', handleAuthRequest);
+
 app.use(express.json());
 app.use(cookieParser());
 
-// Define Routes
-const { handleAuthRequest } = require('./lib/auth');
-app.use('/api/auth', handleAuthRequest);
+// Define Core API Routes
 app.use('/api/rooms', require('./routes/rooms'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/reviews', require('./routes/reviews'));
