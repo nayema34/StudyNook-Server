@@ -35,7 +35,7 @@ app.use(cors({
 }));
 // Define Auth Route before body parser using Express 5 route pattern
 const { handleAuthRequest } = require('./lib/auth');
-app.all('/api/auth/{*splat}', handleAuthRequest);
+app.all('/api/auth/*splat', handleAuthRequest);
 
 app.use(express.json());
 app.use(cookieParser());
