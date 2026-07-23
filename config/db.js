@@ -14,15 +14,19 @@ try {
 const DEFAULT_URI = 'mongodb+srv://jannatnayema2_db_user:nayema123@nayema.wjzjamd.mongodb.net/?appName=Nayema';
 
 const connectDB = async () => {
+  if (mongoose.connection.readyState >= 1) {
+    return mongoose.connection;
+  }
   const uri = process.env.MONGODB_URI || DEFAULT_URI;
   try {
     const conn = await mongoose.connect(uri, {
       dbName: 'StudyNook',
     });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
+    return conn;
   } catch (error) {
     console.error(`Database connection error: ${error.message}`);
-    process.exit(1);
+    throw error;
   }
 };
 
