@@ -45,6 +45,31 @@ app.use('/api/rooms', require('./routes/rooms'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/reviews', require('./routes/reviews'));
 
+// Debug Auth Route
+app.get('/api/auth-debug', async (req, res) => {
+  try {
+    const { getAuth } = require('./lib/auth');
+    const auth = await getAuth();
+    res.json({
+      status: 'OK',
+      authInitialized: !!auth,
+      hasGoogleId: !!process.env.GOOGLE_CLIENT_ID,
+      hasGoogleSecret: !!process.env.GOOGLE_CLIENT_SECRET,
+      hasBetterAuthSecret: !!process.env.BETTER_AUTH_SECRET,
+      hasBetterAuthUrl: !!process.env.BETTER_AUTH_URL,
+      vercelUrl: process.env.VERCEL_URL || null,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'ERROR',
+      message: err.message,
+      stack: err.stack,
+      hasGoogleId: !!process.env.GOOGLE_CLIENT_ID,
+      hasGoogleSecret: !!process.env.GOOGLE_CLIENT_SECRET,
+    });
+  }
+});
+
 // Base & Health Routes
 app.get('/', (req, res) => {
   res.send('StudyNook API is running...');
