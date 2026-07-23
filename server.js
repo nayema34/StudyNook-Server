@@ -17,8 +17,20 @@ connectDB();
 
 // Middleware
 app.use(requestLogger);
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://study-nook-client-flame.vercel.app',
+  ...(process.env.CLIENT_URL ? [process.env.CLIENT_URL] : [])
+];
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(null, true);
+    }
+  },
   credentials: true,
 }));
 app.use(express.json());
