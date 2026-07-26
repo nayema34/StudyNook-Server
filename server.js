@@ -34,18 +34,6 @@ app.use(cors({
   credentials: true,
 }));
 
-// Define Auth Route (Must be mounted BEFORE express.json())
-const { handleAuthRequest } = require('./lib/auth');
-app.all('/api/auth/*', handleAuthRequest);
-
-app.use(express.json());
-app.use(cookieParser());
-
-// Define Core API Routes
-app.use('/api/rooms', require('./routes/rooms'));
-app.use('/api/bookings', require('./routes/bookings'));
-app.use('/api/reviews', require('./routes/reviews'));
-
 // Debug Auth Route
 app.get('/api/auth-debug', async (req, res) => {
   try {
@@ -70,6 +58,18 @@ app.get('/api/auth-debug', async (req, res) => {
     });
   }
 });
+
+// Define Auth Route (Must be mounted BEFORE express.json())
+const { handleAuthRequest } = require('./lib/auth');
+app.all('/api/auth/*', handleAuthRequest);
+
+app.use(express.json());
+app.use(cookieParser());
+
+// Define Core API Routes
+app.use('/api/rooms', require('./routes/rooms'));
+app.use('/api/bookings', require('./routes/bookings'));
+app.use('/api/reviews', require('./routes/reviews'));
 
 // Base & Health Routes
 app.get('/', (req, res) => {
