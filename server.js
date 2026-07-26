@@ -49,7 +49,7 @@ app.get('/api/auth-debug', async (req, res) => {
       vercelUrl: process.env.VERCEL_URL || null,
     });
   } catch (err) {
-    res.status(500).json({
+    res.status(200).json({
       status: 'ERROR',
       message: err.message,
       stack: err.stack,
