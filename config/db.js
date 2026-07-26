@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const dns = require('dns');
 
-// Ensure DNS SRV lookup uses reliable public DNS servers if system DNS refuses SRV queries
+// Ensure DNS SRV lookup uses public DNS servers if system DNS refuses SRV queries
 try {
   dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
   if (dns.setDefaultResultOrder) {
@@ -26,7 +26,6 @@ const connectDB = async () => {
     return conn;
   } catch (error) {
     console.error(`Database connection error: ${error.message}`);
-    throw error;
   }
 };
 
