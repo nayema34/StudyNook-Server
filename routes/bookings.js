@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Booking = require('../models/Booking');
-const Room = require('../models/Room');
-const User = require('../models/User');
+const { ObjectId } = require('mongodb');
+const { connectDB } = require('../config/db');
 const authMiddleware = require('../middleware/auth');
 
 // @route   POST /api/bookings
@@ -10,31 +9,32 @@ const authMiddleware = require('../middleware/auth');
 // @access  Private
 router.post('/', authMiddleware, async (req, res) => {
   try {
+    const { db } = await connectDB();
     const { roomId, date, startTime, endTime, specialNote } = req.body;
 
     if (!roomId || !date || !startTime || !endTime) {
       return res.status(400).json({ message: 'Missing booking details.' });
     }
 
-    // Verify room exists
-    const room = await Room.findById(roomId);
+    if (!ObjectId.isValid(roomId)) {
+      return res.status(404).json({ message: 'Room not found.' });
+    }
+
+    const room = await db.collection('rooms').findOne({ _id: new ObjectId(roomId) });
     if (!room) {
       return res.status(404).json({ message: 'Room not found.' });
     }
 
-    // Calculate total cost
     const startHour = parseInt(startTime.split(':')[0], 10);
     const endHour = parseInt(endTime.split(':')[0], 10);
-    
+
     if (endHour <= startHour) {
       return res.status(400).json({ message: 'End time must be after start time.' });
     }
 
     const totalCost = (endHour - startHour) * room.hourlyRate;
 
-    // Booking Conflict Check
-    // Overlap condition: (request.startTime < existing.endTime) AND (request.endTime > existing.startTime)
-    const conflict = await Booking.findOne({
+    const conflict = await db.collection('bookings').findOne({
       roomId,
       date,
       status: 'confirmed',
@@ -48,8 +48,7 @@ router.post('/', authMiddleware, async (req, res) => {
       });
     }
 
-    // Create booking
-    const booking = new Booking({
+    const newBooking = {
       roomId,
       userId: req.user.id,
       date,
@@ -58,19 +57,22 @@ router.post('/', authMiddleware, async (req, res) => {
       totalCost,
       specialNote: specialNote || '',
       status: 'confirmed',
-    });
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
-    const savedBooking = await booking.save();
+    const result = await db.collection('bookings').insertOne(newBooking);
+    const savedBooking = { _id: result.insertedId, ...newBooking };
 
-    // 1. Push booking ID to user's bookings array
-    await User.findByIdAndUpdate(req.user.id, {
-      $push: { bookings: savedBooking._id },
-    });
+    await db.collection('user').updateOne(
+      { _id: req.user.id },
+      { $push: { bookings: savedBooking._id } }
+    );
 
-    // 2. Increment room's booking count
-    await Room.findByIdAndUpdate(roomId, {
-      $inc: { bookingCount: 1 },
-    });
+    await db.collection('rooms').updateOne(
+      { _id: new ObjectId(roomId) },
+      { $inc: { bookingCount: 1 } }
+    );
 
     res.status(201).json({
       message: 'Room booked successfully!',
@@ -87,11 +89,31 @@ router.post('/', authMiddleware, async (req, res) => {
 // @access  Private
 router.get('/my', authMiddleware, async (req, res) => {
   try {
-    const bookings = await Booking.find({ userId: req.user.id })
-      .populate('roomId', 'name image hourlyRate floor')
-      .sort({ createdAt: -1 });
+    const { db } = await connectDB();
+    const bookings = await db
+      .collection('bookings')
+      .find({ userId: req.user.id })
+      .sort({ createdAt: -1 })
+      .toArray();
 
-    res.json(bookings);
+    // Populate room details for each booking
+    const populatedBookings = await Promise.all(
+      bookings.map(async (b) => {
+        let room = null;
+        if (b.roomId && ObjectId.isValid(b.roomId)) {
+          room = await db.collection('rooms').findOne(
+            { _id: new ObjectId(b.roomId) },
+            { projection: { name: 1, image: 1, hourlyRate: 1, floor: 1 } }
+          );
+        }
+        return {
+          ...b,
+          roomId: room || b.roomId,
+        };
+      })
+    );
+
+    res.json(populatedBookings);
   } catch (error) {
     console.error('Fetch my bookings error:', error.message);
     res.status(500).json({ message: 'Server error' });
@@ -103,14 +125,17 @@ router.get('/my', authMiddleware, async (req, res) => {
 // @access  Private
 router.patch('/:id/cancel', authMiddleware, async (req, res) => {
   try {
-    const booking = await Booking.findById(req.params.id);
+    const { db } = await connectDB();
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Booking not found.' });
+    }
 
+    const booking = await db.collection('bookings').findOne({ _id: new ObjectId(req.params.id) });
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found.' });
     }
 
-    // Check if the booking belongs to the user
-    if (booking.userId.toString() !== req.user.id) {
+    if (booking.userId !== req.user.id && booking.userId?.toString() !== req.user.id) {
       return res.status(403).json({ message: 'Unauthorized action.' });
     }
 
@@ -118,19 +143,22 @@ router.patch('/:id/cancel', authMiddleware, async (req, res) => {
       return res.status(400).json({ message: 'Booking is already cancelled.' });
     }
 
-    // Update status to cancelled
-    booking.status = 'cancelled';
-    await booking.save();
+    await db.collection('bookings').updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: { status: 'cancelled', updatedAt: new Date() } }
+    );
 
-    // Remove booking ID from user's bookings array
-    await User.findByIdAndUpdate(req.user.id, {
-      $pull: { bookings: booking._id },
-    });
+    await db.collection('user').updateOne(
+      { _id: req.user.id },
+      { $pull: { bookings: booking._id } }
+    );
 
-    // Decrement room's booking count
-    await Room.findByIdAndUpdate(booking.roomId, {
-      $inc: { bookingCount: -1 },
-    });
+    if (booking.roomId && ObjectId.isValid(booking.roomId)) {
+      await db.collection('rooms').updateOne(
+        { _id: new ObjectId(booking.roomId) },
+        { $inc: { bookingCount: -1 } }
+      );
+    }
 
     res.json({ message: 'Booking cancelled successfully.' });
   } catch (error) {
