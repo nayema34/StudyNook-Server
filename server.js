@@ -1,4 +1,4 @@
-require('dotenv').config(); // Load environment variables
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -17,9 +17,12 @@ connectDB();
 
 // Middleware
 app.use(requestLogger);
+
 const allowedOrigins = [
   'http://localhost:3000',
+  'http://localhost:5000',
   'https://study-nook-client-flame.vercel.app',
+  'https://study-nook-server-silk.vercel.app',
   ...(process.env.CLIENT_URL ? [process.env.CLIENT_URL] : [])
 ];
 
@@ -42,8 +45,6 @@ app.get('/api/auth-debug', async (req, res) => {
     res.json({
       status: 'OK',
       authInitialized: !!auth,
-      hasGoogleId: !!process.env.GOOGLE_CLIENT_ID,
-      hasGoogleSecret: !!process.env.GOOGLE_CLIENT_SECRET,
       hasBetterAuthSecret: !!process.env.BETTER_AUTH_SECRET,
       hasBetterAuthUrl: !!process.env.BETTER_AUTH_URL,
       vercelUrl: process.env.VERCEL_URL || null,
@@ -53,8 +54,6 @@ app.get('/api/auth-debug', async (req, res) => {
       status: 'ERROR',
       message: err.message,
       stack: err.stack,
-      hasGoogleId: !!process.env.GOOGLE_CLIENT_ID,
-      hasGoogleSecret: !!process.env.GOOGLE_CLIENT_SECRET,
     });
   }
 });
