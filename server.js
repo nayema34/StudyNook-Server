@@ -61,7 +61,7 @@ app.get('/api/auth-debug', async (req, res) => {
 
 // Define Auth Route (Must be mounted BEFORE express.json())
 const { handleAuthRequest } = require('./lib/auth');
-app.use('/api/auth', handleAuthRequest);
+app.all('/api/auth/{*splat}', handleAuthRequest);
 
 app.use(express.json());
 app.use(cookieParser());
