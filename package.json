@@ -23,6 +23,7 @@
     "express": "^5.2.1",
     "google-auth-library": "^10.9.0",
     "jsonwebtoken": "^9.0.3",
+    "mongodb": "^6.13.0",
     "mongoose": "^9.7.4"
   },
   "devDependencies": {
