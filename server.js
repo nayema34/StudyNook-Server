@@ -34,12 +34,12 @@ app.use(cors({
   credentials: true,
 }));
 
+// Define Auth Route (Must be mounted BEFORE express.json())
+const { handleAuthRequest } = require('./lib/auth');
+app.all('/api/auth/*', handleAuthRequest);
+
 app.use(express.json());
 app.use(cookieParser());
-
-// Define Auth Route
-const { handleAuthRequest } = require('./lib/auth');
-app.all('/api/auth/*splat', handleAuthRequest);
 
 // Define Core API Routes
 app.use('/api/rooms', require('./routes/rooms'));
