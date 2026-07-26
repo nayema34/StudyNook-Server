@@ -5,7 +5,7 @@
       "src": "server.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["node_modules/better-auth/**"]
+        "includeFiles": ["node_modules/better-auth/**", "node_modules/mongodb/**"]
       }
     }
   ],
