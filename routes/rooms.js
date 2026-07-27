@@ -4,9 +4,6 @@ const { ObjectId } = require('mongodb');
 const { connectDB } = require('../config/db');
 const authMiddleware = require('../middleware/auth');
 
-// @route   GET /api/rooms
-// @desc    Get all rooms with search, filter, and sorting
-// @access  Public
 router.get('/', async (req, res) => {
   try {
     const { db } = await connectDB();
@@ -48,9 +45,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// @route   GET /api/rooms/:id
-// @desc    Get specific room by ID
-// @access  Public
 router.get('/:id', async (req, res) => {
   try {
     const { db } = await connectDB();
@@ -70,9 +64,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// @route   POST /api/rooms
-// @desc    Add a new room
-// @access  Private
 router.post('/', authMiddleware, async (req, res) => {
   try {
     const { db } = await connectDB();
@@ -106,9 +97,6 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
-// @route   PUT /api/rooms/:id
-// @desc    Update an existing room (owner only)
-// @access  Private
 router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const { db } = await connectDB();
@@ -150,9 +138,6 @@ router.put('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// @route   DELETE /api/rooms/:id
-// @desc    Delete a room (owner only)
-// @access  Private
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const { db } = await connectDB();

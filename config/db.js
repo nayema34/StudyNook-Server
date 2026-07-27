@@ -1,7 +1,6 @@
 const { MongoClient } = require('mongodb');
 const dns = require('dns');
 
-// Ensure DNS SRV lookup uses public DNS servers on local machine if needed
 if (!process.env.VERCEL) {
   try {
     dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);

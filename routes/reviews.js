@@ -4,9 +4,6 @@ const { ObjectId } = require('mongodb');
 const { connectDB } = require('../config/db');
 const authMiddleware = require('../middleware/auth');
 
-// @route   GET /api/reviews/room/:roomId
-// @desc    Get reviews for a specific room
-// @access  Public
 router.get('/room/:roomId', async (req, res) => {
   try {
     const { db } = await connectDB();
@@ -46,9 +43,6 @@ router.get('/room/:roomId', async (req, res) => {
   }
 });
 
-// @route   POST /api/reviews
-// @desc    Add a review for a room
-// @access  Private
 router.post('/', authMiddleware, async (req, res) => {
   try {
     const { db } = await connectDB();

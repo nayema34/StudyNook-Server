@@ -6,10 +6,7 @@ const connectDB = require('./config/db');
 
 const app = express();
 
-// Connect to Database
 connectDB();
-
-// Middleware
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5000',
@@ -29,7 +26,6 @@ app.use(cors({
   credentials: true,
 }));
 
-// Debug Auth Route
 app.get('/api/auth-debug', async (req, res) => {
   try {
     const { getAuth } = require('./lib/auth');
@@ -50,19 +46,16 @@ app.get('/api/auth-debug', async (req, res) => {
   }
 });
 
-// Define Auth Route (Must be mounted BEFORE express.json())
 const { handleAuthRequest } = require('./lib/auth');
 app.all('/api/auth/{*splat}', handleAuthRequest);
 
 app.use(express.json());
 app.use(cookieParser());
 
-// Define Routes
 app.use('/api/rooms', require('./routes/rooms'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/reviews', require('./routes/reviews'));
 
-// Base & Health Routes
 app.get('/', (req, res) => {
   res.send('StudyNook API is running...');
 });

@@ -8,18 +8,13 @@ const authMiddleware = require('../middleware/auth');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// JWT Cookie options
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'strict',
-  maxAge: 24 * 60 * 60 * 1000, // 1 day
+  maxAge: 24 * 60 * 60 * 1000,
 };
 
-
-// @route   POST /api/auth/register
-// @desc    Register a new user
-// @access  Public
 router.post('/register', async (req, res) => {
   try {
     const { name, email, photoUrl, password } = req.body;
@@ -36,13 +31,11 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Password must contain both uppercase and lowercase letters' });
     }
 
-    // Check if user exists
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -62,9 +55,6 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// @route   POST /api/auth/login
-// @desc    Authenticate user and get token in cookie
-// @access  Public
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -101,9 +91,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// @route   POST /api/auth/google
-// @desc    Google Sign-In
-// @access  Public
 router.post('/google', async (req, res) => {
   try {
     const { token } = req.body;
@@ -125,7 +112,6 @@ router.post('/google', async (req, res) => {
 
     let user = await User.findOne({ email });
     if (!user) {
-      // Create a user with mock password
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(Math.random().toString(36).substring(2, 15), salt);
 
@@ -169,9 +155,6 @@ router.post('/google', async (req, res) => {
   }
 });
 
-// @route   POST /api/auth/logout
-// @desc    Logout user & clear cookie
-// @access  Public
 router.post('/logout', (req, res) => {
   res.clearCookie('token', {
     httpOnly: true,
@@ -181,9 +164,6 @@ router.post('/logout', (req, res) => {
   res.json({ message: 'Logged out successfully' });
 });
 
-// @route   GET /api/auth/me
-// @desc    Get current user profile
-// @access  Private
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');

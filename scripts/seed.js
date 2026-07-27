@@ -78,26 +78,23 @@ const seedDatabase = async () => {
     await connectDB();
     console.log('Database connected for seeding...');
 
-    // Ensure an owner user exists
     let owner = await User.findOne();
     if (!owner) {
       owner = new User({
         name: 'StudyNook Admin',
         email: 'admin@studynook.com',
-        password: '$2a$10$e7W5iXvK9Jk0N1WvGZ1e0e8QnZ8W8W8W8W8W8W8W8W8W8W8W8W8W8', // hashed placeholder
+        password: '$2a$10$e7W5iXvK9Jk0N1WvGZ1e0e8QnZ8W8W8W8W8W8W8W8W8W8W8W8W8W8',
         photoUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150',
       });
       await owner.save();
       console.log('Created default admin owner user.');
     }
 
-    // Attach ownerId to all sample rooms
     const roomsToInsert = sampleRooms.map(room => ({
       ...room,
       ownerId: owner._id,
     }));
 
-    // Clear existing rooms and insert sample rooms
     await Room.deleteMany({});
     const createdRooms = await Room.insertMany(roomsToInsert);
 

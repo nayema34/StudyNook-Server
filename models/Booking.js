@@ -12,15 +12,15 @@ const BookingSchema = new mongoose.Schema({
     required: true,
   },
   date: {
-    type: String, // YYYY-MM-DD
+    type: String,
     required: true,
   },
   startTime: {
-    type: String, // HH:MM (e.g. 08:00)
+    type: String,
     required: true,
   },
   endTime: {
-    type: String, // HH:MM (e.g. 10:00)
+    type: String,
     required: true,
   },
   totalCost: {

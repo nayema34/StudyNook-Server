@@ -4,9 +4,6 @@ const { ObjectId } = require('mongodb');
 const { connectDB } = require('../config/db');
 const authMiddleware = require('../middleware/auth');
 
-// @route   POST /api/bookings
-// @desc    Book a room (Private)
-// @access  Private
 router.post('/', authMiddleware, async (req, res) => {
   try {
     const { db } = await connectDB();
@@ -84,9 +81,6 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
-// @route   GET /api/bookings/my
-// @desc    Get bookings of the logged-in user (Private)
-// @access  Private
 router.get('/my', authMiddleware, async (req, res) => {
   try {
     const { db } = await connectDB();
@@ -96,7 +90,6 @@ router.get('/my', authMiddleware, async (req, res) => {
       .sort({ createdAt: -1 })
       .toArray();
 
-    // Populate room details for each booking
     const populatedBookings = await Promise.all(
       bookings.map(async (b) => {
         let room = null;
@@ -120,9 +113,6 @@ router.get('/my', authMiddleware, async (req, res) => {
   }
 });
 
-// @route   PATCH /api/bookings/:id/cancel
-// @desc    Cancel a booking (Private)
-// @access  Private
 router.patch('/:id/cancel', authMiddleware, async (req, res) => {
   try {
     const { db } = await connectDB();
