@@ -47,7 +47,7 @@ app.get('/api/auth-debug', async (req, res) => {
 });
 
 const { handleAuthRequest } = require('./lib/auth');
-app.all('/api/auth/{*splat}', handleAuthRequest);
+app.use('/api/auth', handleAuthRequest);
 
 app.use(express.json());
 app.use(cookieParser());
